@@ -1,7 +1,5 @@
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define HEIGHT      10
 #define WIDTH       30
