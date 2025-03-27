@@ -7,20 +7,22 @@
 static int sx = WIDTH/2;
 static int sy = HEIGHT/2;
 static int fx, fy;
-static int gameover = 0;
+static int zx, zy;
+static int gameover;
 
-static unsigned int score = 0;
+static unsigned int score;
+static int level = 1;
 
-static void gen_fruit(void)
+static void gen_pos_x_pos_y(int *x, int *y)
 {
-    fx = arc4random_uniform(WIDTH);
-    fy = arc4random_uniform(HEIGHT);
+    *x = arc4random_uniform(WIDTH);
+    *y = arc4random_uniform(HEIGHT);
 
-    while (fx <= 1 || fx >= WIDTH-1) {
-        fx = arc4random_uniform(WIDTH);
+    while (*x <= 1 || *x >= WIDTH-1) {
+        *x = arc4random_uniform(WIDTH);
     }
-    while (fy <= 1 || fy >= HEIGHT-1) {
-        fy = arc4random_uniform(HEIGHT);
+    while (*y <= 1 || *y >= HEIGHT-1) {
+        *y = arc4random_uniform(HEIGHT);
     }
 }
 
@@ -40,6 +42,7 @@ static void draw(void)
 
     printf("~~~~~~~~~\n");
     printf("SCORE: %d\n", score);
+    printf("LEVEL: %d\n", level);
     printf("~~~~~~~~~\n");
 
     // up
@@ -47,8 +50,8 @@ static void draw(void)
         printf("*");
     printf("\n");
 
-    for (int i = 0; i < HEIGHT; ++i) {
-        for (int j = 0; j <= WIDTH; ++j) {
+    for (int i = 0; i < HEIGHT+level; ++i) {
+        for (int j = 0; j <= WIDTH+level; ++j) {
 
             // corners
             if (j == 0 || j == WIDTH-1) {
@@ -57,13 +60,18 @@ static void draw(void)
 
             if ((j == fx && i == fy) && (j == sx && i == sy)) {
                 printf("0");
+            } else if ((j == zx && i == zy) && (j == sx && i == sy)) {
+                printf("x");
             } else if (j == fx && i == fy) {
                 printf("@");
             } else if (j == sx && i == sy) {
                 printf("0");
+            } else if (j == zx && i == zy) {
+                printf("x");
             } else {
                 printf(" ");
             }
+
         }
         printf("\n");
     }
@@ -96,15 +104,24 @@ static void logic(void)
 {
     if (sx == fx && sy == fy) {
         ++score;
-        gen_fruit();
+        gen_pos_x_pos_y(&fx, &fy);
+        if (score % 2 == 0) {
+            level++;
+        }
     }
+    gen_pos_x_pos_y(&zx, &zy);
 
+    if (sx == zx && sy == zy) {
+        gameover = 1;
+        printf("           GAME OVER            \n");
+        printf("YOU HAVE BEEN KILLED BY A ZOMBIE\n");
+    }
     if (sx < 1 || sx >= WIDTH-1 || sy < 0 || sy >= HEIGHT) gameover = 1;
 }
 
 int main(void)
 {
-    gen_fruit();
+    gen_pos_x_pos_y(&fx, &fy);
 
     while (!gameover) {
         draw();
